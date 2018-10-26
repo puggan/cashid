@@ -1,0 +1,32 @@
+{
+  "name": "puggan/cashid",
+  "description": "CachID library for php",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thorbjörn Sundragon",
+      "email": "puggan@spiro.se"
+    }
+  ],
+  "require": {},
+  "require-dev": {
+    "phpunit/phpunit": "^7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Puggan\\CashID\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\Puggan\\CashID\\": "tests"
+    }
+  },
+  "config": {
+    "preferred-install": "dist",
+    "platform": {
+      "php": "v7.2.11"
+    }
+  }
+}
