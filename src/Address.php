@@ -86,21 +86,55 @@
 			if($this->type !== 'P2KH') {
 				throw new InvalidAddress('Bad key type, only P2KH implemented');
 			}
+		}
 
-			// checksum PolyMod from https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/cashaddr.md#checksum
-			$c = 1;
-			$data_length = $total_length - 5;
-			$adress_checksum = 0;
-			foreach($this->binary_address as $index => $d)
+		/**
+		 * @see https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/cashaddr.md#checksum
+		 *
+		 * @param string $s complete string with checksum
+		 *
+		 * @return bool
+		 * @throws InvalidAddress
+		 */
+		public static function validate_b32_checksum($s) : bool
+		{
+			$data = substr($s, 0, -8);
+			$checksum = substr($s, -8);
+
+			return self::b32_checksum($data) === $checksum;
+		}
+
+		/**
+		 * @see https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/cashaddr.md#checksum
+		 *
+		 * @param string $s complete string to checksum
+		 *
+		 * @return string
+		 * @throws InvalidAddress
+		 */
+		public static function b32_checksum($s) : string
+		{
+			$i5s = [];
+			foreach($s ? str_split($s) : [] as $char)
 			{
-				if($index >= $data_length) {
-					$adress_checksum = ($adress_checksum << 8) + $d;
-					continue;
+				$v = strpos(self::CachCharset, $char);
+				if($v === FALSE)
+				{
+					throw new InvalidAddress('Not base32-encoded');
 				}
+				$i5s[] = $v;
+			}
 
+			// start with one
+			$c = 1;
+			foreach($i5s as $i5)
+			{
+				// shift off overflow (40-5=35)
 				$c0 = $c >> 35;
-				$c = (($c & 0x07ffffffff) << 5) ^ $d;
+				// shift in new bits
+				$c = (($c & 0x07ffffffff) << 5) ^ $i5;
 
+				// Apply xor with a constant for each of the 5 overflow bits
 				if($c0 & 0x01)
 				{
 					$c ^= 0x98f2bc8e61;
@@ -122,11 +156,50 @@
 					$c ^= 0x1e4f43e470;
 				}
 			}
+
+			// xor away the one we started with
 			$c ^= 1;
-			if($c !== $adress_checksum)
+
+			$checksum = '';
+			foreach(range(0,7) as $position)
 			{
-				throw new InvalidAddress('Unknown key type, only P2KH and P2SH implemented');
+				$current = $c & 0x1F;
+				$c >>= 5;
+				$checksum = self::CachCharset[$current] . $checksum;
 			}
+
+			return $checksum;
+		}
+
+		/**
+		 * @see https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/cashaddr.md#checksum
+		 *
+		 * @param string $s part after prefix:
+		 *
+		 * @return bool
+		 * @throws InvalidAddress
+		 */
+		public static function validate_bitcoincash_checksum($s) : bool
+		{
+			$data = substr($s, 0, -8);
+			$checksum = substr($s, -8);
+
+			return self::bitcoincash_checksum($data) === $checksum;
+		}
+
+		/**
+		 * @see https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/cashaddr.md#checksum
+		 *
+		 * @param string $s part after prefix:
+		 * @param string $prefix the base32 representation of the prfix, 'zf5r0fwrpngq' for 'bitcoincash:'
+		 * @param string $sufix the zerofilled placeholder for the checksum
+		 *
+		 * @return string
+		 * @throws InvalidAddress
+		 */
+		public static function bitcoincash_checksum($s, $prefix = 'zf5r0fwrpngq', $sufix = 'qqqqqqqq') : string
+		{
+			return self::b32_checksum($prefix . $s . $sufix);
 		}
 
 		/**
@@ -142,18 +215,27 @@
 				$s = substr($s, \strlen($prefix));
 			}
 
-			if(!preg_match('#^[' . self::CachCharset . ']$#', $s))
+			if(!preg_match('#^[' . self::CachCharset . ']+$#', $s))
 			{
 				throw new InvalidAddress('Not base32-encoded');
 			}
 
-			return new self(self::base32_decode($s));
+			if(!self::validate_b32_checksum($s))
+			{
+				throw new InvalidAddress('Checksum error');
+			}
+
+			return new self(self::base32_decode(substr($s, 0, -8)));
 		}
 
-		public function toCashAddr()
+		/**
+		 * @return string
+		 * @throws InvalidAddress
+		 */
+		public function toCashAddr() : string
 		{
-			return 'bitcoincash:' . self::base32_encode($this->binary_address);
-
+			$data = self::base32_encode($this->binary_address);
+			return 'bitcoincash:' . $data . self::b32_checksum($data);
 		}
 
 		/**
@@ -210,7 +292,7 @@
 		 * @return string
 		 * @throws InvalidAddress
 		 */
-		public static function base32_encode($i8s)
+		public static function base32_encode($i8s) : string
 		{
 			$data = '';
 			$current = 0;
