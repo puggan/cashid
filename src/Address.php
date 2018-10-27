@@ -204,10 +204,36 @@
 			return $b256_data;
 		}
 
-		public static function base32_encode($v)
+		/**
+		 * @param int[] $v
+		 *
+		 * @return string
+		 * @throws InvalidAddress
+		 */
+		public static function base32_encode($i8s)
 		{
-			// TODO
-			return '';
+			$data = '';
+			$current = 0;
+			$current_bits = 0;
+			foreach($i8s as $i8)
+			{
+				$current = ($current << 8) + $i8;
+				$current_bits += 8;
+				while($current_bits >= 5)
+				{
+					$current_bits -= 5;
+					$wanted = $current >> $current_bits;
+					$current -= $wanted << $current_bits;
+					$data .= self::CachCharset[$wanted];
+				}
+			}
+
+			if($current_bits > 0)
+			{
+				throw new InvalidAddress('unused bits left in buffer at base32_encode()');
+			}
+
+			return $data;
 		}
 
 		/**

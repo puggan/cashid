@@ -28,10 +28,14 @@
 
 		public function testBase32_encode()
 		{
-			return;
+			$i8s = array_map(
+				'ord',
+				str_split('Hello')
+			);
+
 			$this->assertEquals(
 				'fpjkcmr0',
-				Address::base32_encode('Hello')
+				Address::base32_encode($i8s)
 			);
 		}
 
