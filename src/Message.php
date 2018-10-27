@@ -76,19 +76,7 @@
 		 */
 		public static function i8s2bin(array $i8s) : string
 		{
-			$data = '';
-			foreach($i8s as $n)
-			{
-				if($n <= 0xF)
-				{
-					$data .= hex2bin('0' . dechex($n));
-				}
-				else
-				{
-					$data .= hex2bin(dechex($n));
-				}
-			}
-			return $data;
+			return implode('', array_map('chr', $i8s));
 		}
 
 		/**
