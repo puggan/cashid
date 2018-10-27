@@ -1,20 +1,8 @@
 <?php
-	/**
-	 * Created by PhpStorm.
-	 * User: puggan
-	 * Date: 2018-10-26
-	 * Time: 23:27
-	 */
 
 	namespace Puggan\CashID;
 
-	use Mdanter\Ecc\Curves\CurveFactory;
-	use Mdanter\Ecc\Math\MathAdapterFactory;
-	use Mdanter\Ecc\Primitives\CurveFpInterface;
-	use Mdanter\Ecc\Primitives\GeneratorPoint;
-	use Mdanter\Ecc\Primitives\PointInterface;
 	use Puggan\CashID\Exceptions\InvalidAddress;
-	use Mdanter\Ecc\Crypto\Key\PublicKeyInterface;
 
 	/**
 	 * Class Address
@@ -22,7 +10,7 @@
 	 *
 	 * @property int[] binary_address address in 8bit integers
 	 */
-	class Address implements PublicKeyInterface
+	class Address
 	{
 		/** @var string base32 charset  */
 		public const CachCharset = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
@@ -315,30 +303,5 @@
 			}
 
 			return $data;
-		}
-
-		/**
-		 * @return CurveFpInterface
-		 */
-		public function getCurve() : CurveFpInterface
-		{
-			return (new \Mdanter\Ecc\Curves\SecgCurve(MathAdapterFactory::getAdapter()))->curve256k1();
-		}
-
-		/**
-		 * @return PointInterface
-		 */
-		public function getPoint() : PointInterface
-		{
-			// TODO: Implement getPoint() method.
-		}
-
-		/**
-		 * @return GeneratorPoint
-		 * @throws \RuntimeException
-		 */
-		public function getGenerator() : GeneratorPoint
-		{
-			return CurveFactory::getGeneratorByName('secp256k1');
 		}
 	}

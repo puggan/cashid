@@ -89,4 +89,54 @@
 			return hash('sha256', hash('sha256', $data, true), true);
 		}
 
+		/**
+		 * @param Signature $signature
+		 */
+		public function get_public_key($signature)
+		{
+			/*
+			 * /* jshint maxstatements: 25 * /
+			var i = this.sig.i;
+			$.checkArgument(i === 0 || i === 1 || i === 2 || i === 3, new Error('i must be equal to 0, 1, 2, or 3'));
+
+			var e = BN.fromBuffer(this.hashbuf);
+			var r = this.sig.r;
+			var s = this.sig.s;
+
+			// A set LSB signifies that the y-coordinate is odd
+			var isYOdd = i & 1;
+
+			// The more significant bit specifies whether we should use the
+			// first or second candidate key.
+			var isSecondKey = i >> 1;
+
+			var n = Point.getN();
+			var G = Point.getG();
+
+			// 1.1 Let x = r + jn
+			var x = isSecondKey ? r.add(n) : r;
+			var R = Point.fromX(isYOdd, x);
+
+			// 1.4 Check that nR is at infinity
+			var nR = R.mul(n);
+
+			if (!nR.isInfinity()) {
+				throw new Error('nR is not a valid curve point');
+			}
+
+			// Compute -e from e
+			var eNeg = e.neg().mod(n);
+
+			// 1.6.1 Compute Q = r^-1 (sR - eG)
+			// Q = r^-1 (sR + -eG)
+			var rInv = r.invm(n);
+
+			//var Q = R.multiplyTwo(s, G, eNeg).mul(rInv);
+			var Q = R.mul(s).add(G.mul(eNeg)).mul(rInv);
+
+			var pubkey = PublicKey.fromPoint(Q, this.sig.compressed);
+
+			return pubkey;
+			 */
+		}
 	}

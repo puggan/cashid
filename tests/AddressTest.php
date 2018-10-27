@@ -1,10 +1,4 @@
 <?php
-	/**
-	 * Created by PhpStorm.
-	 * User: puggan
-	 * Date: 2018-10-27
-	 * Time: 12:09
-	 */
 
 	namespace Tests\Puggan\CashID;
 
@@ -15,6 +9,8 @@
 
 	class AddressTest extends TestCase
 	{
+		public const test_address = 'bitcoincash:qzysvu7h4knpwnmej2wc255mh99m4l9fev5lzg02vj';
+
 		public function testBase32_decode() : void
 		{
 			$this->assertEquals(
@@ -95,8 +91,7 @@
 
 		public function testToCashAddr() : void
 		{
-			$address_string = 'bitcoincash:qzysvu7h4knpwnmej2wc255mh99m4l9fev5lzg02vj';
-			$address = Address::fromCashAddr($address_string);
-			$this->assertEquals($address_string, $address->toCashAddr());
+			$address = Address::fromCashAddr(self::test_address);
+			$this->assertEquals(self::test_address, $address->toCashAddr());
 		}
 	}
