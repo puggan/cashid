@@ -2,6 +2,7 @@
 
 	namespace Puggan\CashID;
 
+	use Mdanter\Ecc\Crypto\Key\PublicKeyInterface;
 	use Puggan\CashID\Exceptions\InvalidAddress;
 
 	/**
@@ -212,6 +213,42 @@
 			}
 
 			return new self(self::base32_decode(substr($s, 0, -8)));
+		}
+
+		/**
+		 *
+		 * @param PublicKeyInterface $key
+		 *
+		 * @return Address
+		 * @throws InvalidAddress
+		 */
+		public static function fromPublicKey(PublicKeyInterface $key, $compressed = true) : Address
+		{
+			$point = $key->getPoint();
+			$x = str_pad(gmp_export($point->getX()), 32, \chr(0));
+			if($compressed)
+			{
+				if((int) gmp_mod($point->getY(), 2))
+				{
+					$pre_hash = \chr(3) . $x;
+				}
+				else
+				{
+					$pre_hash = \chr(2) . $x;
+				}
+			}
+			else
+			{
+				$y = str_pad(gmp_export($point->getY()), 32, \chr(0));
+				$pre_hash = \chr(4) . $x . $y;
+			}
+			$hash = hash('ripemd160', hash('sha256', $pre_hash, true), true);
+			$data = [0];
+			foreach(range(0, 19) as $pos)
+			{
+				$data[] = \ord($hash[$pos]);
+			}
+			return new self($data);
 		}
 
 		/**

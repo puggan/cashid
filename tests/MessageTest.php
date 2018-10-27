@@ -73,9 +73,11 @@
 			$message = new Message(self::test_message);
 			$address = Address::fromCashAddr(self::test_address);
 			$signature = new Signature(self::test_signature);
+			$full_address = $address->toCashAddr();
 
 			$public_key = $message->get_public_key($signature);
-			// $this->assertFalse(empty($public_key));
+
+			$this->assertEquals($full_address, Address::fromPublicKey($public_key)->toCashAddr());
 
 			$ecdsa = new Signer(EccFactory::getAdapter());
 			$this->assertTrue($ecdsa->verify($public_key, $signature, $message->hash()));
