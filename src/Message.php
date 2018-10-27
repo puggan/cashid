@@ -8,7 +8,6 @@
 	use Mdanter\Ecc\Crypto\Signature\Signer;
 	use Mdanter\Ecc\Curves\CurveFactory;
 	use Mdanter\Ecc\EccFactory;
-	use Mdanter\Ecc\Primitives\Point;
 	use Puggan\CashID\Exceptions\InvalidSignature;
 
 	class Message
@@ -45,19 +44,29 @@
 		}
 
 		/**
-		 * @param PublicKeyInterface $address
+		 * @param Address $address
 		 * @param SignatureInterface $signature
 		 *
-		 * @return bool
-		 * @throws \RuntimeException
+		 * @return void
+		 * @throws Exceptions\InvalidAddress
+		 * @throws InvalidSignature
 		 * @throws \LogicException
+		 * @throws \RuntimeException
 		 */
-		public function verify(PublicKeyInterface $address, SignatureInterface $signature) : bool
+		public function verify(Address $address, SignatureInterface $signature) : void
 		{
 			$adapter = EccFactory::getAdapter();
 			$public_key = $this->get_public_key($signature);
-			// TODO compare public key and address
-			return (new Signer($adapter))->verify($public_key, $signature, $this->hash());
+			$signature_address = Address::fromPublicKey($public_key);
+			if($signature_address->binary_address !== $address->binary_address)
+			{
+				throw new InvalidSignature('Address missmatch');
+			}
+
+			if(!(new Signer($adapter))->verify($public_key, $signature, $this->hash()))
+			{
+				throw new InvalidSignature('Not signed by given address');
+			}
 		}
 
 		/**
