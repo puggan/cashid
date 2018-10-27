@@ -66,7 +66,7 @@
 			}
 		}
 
-		public function testValidate_bitcoincash_checksum()
+		public function testValidate_bitcoincash_checksum() : void
 		{
 			$valid_data = [
 				'qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a',
@@ -75,6 +75,7 @@
 				'ppm2qsznhks23z7629mms6s4cwef74vcwvn0h829pq',
 				'pr95sy3j9xwd2ap32xkykttr4cvcu7as4yc93ky28e',
 				'pqq3728yw0y47sqn6l2na30mcw6zm78dzq5ucqzc37',
+				'qzysvu7h4knpwnmej2wc255mh99m4l9fev5lzg02vj',
 			];
 
 			foreach($valid_data as $current)
@@ -94,7 +95,6 @@
 
 		public function testToCashAddr() : void
 		{
-			return;
 			$address_string = 'bitcoincash:qzysvu7h4knpwnmej2wc255mh99m4l9fev5lzg02vj';
 			$address = Address::fromCashAddr($address_string);
 			$this->assertEquals($address_string, $address->toCashAddr());

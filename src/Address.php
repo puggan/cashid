@@ -66,10 +66,8 @@
 			$type_index = $this->binary_address[0] >> 3;
 			$length_index = $this->binary_address[0] & 0x07;
 			$hash_length = self::LengthTableByte[$length_index];
-			// 8bit + length + 40bit
-			$total_length = 6 + $hash_length;
 
-			if(\count($this->binary_address) !== $total_length)
+			if(\count($this->binary_address) !== $hash_length + 1)
 			{
 				throw new InvalidAddress('Invalid Lenght');
 			}
@@ -220,7 +218,7 @@
 				throw new InvalidAddress('Not base32-encoded');
 			}
 
-			if(!self::validate_b32_checksum($s))
+			if(!self::validate_bitcoincash_checksum($s))
 			{
 				throw new InvalidAddress('Checksum error');
 			}
@@ -235,7 +233,7 @@
 		public function toCashAddr() : string
 		{
 			$data = self::base32_encode($this->binary_address);
-			return 'bitcoincash:' . $data . self::b32_checksum($data);
+			return 'bitcoincash:' . $data . self::bitcoincash_checksum($data);
 		}
 
 		/**
@@ -312,7 +310,8 @@
 
 			if($current_bits > 0)
 			{
-				throw new InvalidAddress('unused bits left in buffer at base32_encode()');
+				$current <<= (5 - $current_bits);
+				$data .= self::CachCharset[$current];
 			}
 
 			return $data;
