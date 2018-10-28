@@ -155,7 +155,7 @@
 		 */
 		public static function create_nonnce(int $length = 32) : string
 		{
-			return Common::base64url_encode(substr(random_bytes(ceil($length*2/3)), 0, $length));
+			return Common::base64url_encode(substr(random_bytes(ceil($length*3/4)), 0, $length));
 		}
 
 	}
